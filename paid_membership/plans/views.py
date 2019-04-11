@@ -128,9 +128,17 @@ def settings(request):
     membership = False
     cancel_at_period_end = False
     if request.method == 'POST':
-        pass
+        subscription = stripe.Subscription.retrieve(
+            request.user.customer.stripe_sub_id
+        )
+        subscription.cancel_at_period_end = True
+        request.user.customer.cancel_at_period_end = True
+        cancel_at_period_end = True
+        subscription.save()
+        request.user.customer.save()
     elif request.method == 'GET':
         try:
+            # try is used since there may be a user without a customer
             if request.user.customer.membership:
                 membership = True
             if request.user.customer.cancel_at_period_end:
