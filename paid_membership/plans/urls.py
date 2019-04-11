@@ -28,12 +28,12 @@ urlpatterns = [
     ),
     path(
         'checkout',
-        checkout,
+        CheckoutView.as_view(),
         name='checkout'
     ),
     path(
         'auth/settings',
-        settings,
+        SettingsView.as_view(),
         name='settings'
     ),
     path(
