@@ -19,9 +19,16 @@ def home(request):
 def plan(request, pk):
     plan = get_object_or_404(FitnessPlan, pk=pk)
     if plan.premium:
-        return redirect('join')
+        if request.user.is_authenticated:
+            try:
+                if request.user.customer.membership:
+                    return render(request, 'plans/plan.html', {'plan': plan})
+            except Customer.DoesNotExist:
+                pass
     else:
         return render(request, 'plans/plan.html', {'plan': plan})
+
+    return redirect('join')
 
 
 def join(request):
@@ -30,6 +37,12 @@ def join(request):
 
 @login_required
 def checkout(request):
+
+    try:
+        if request.user.customer.membership:
+            return redirect('settings')
+    except Customer.DoesNotExist:
+        pass
 
     coupons = dict(
         halloween=31,
@@ -47,25 +60,36 @@ def checkout(request):
 
         if request.POST['coupon'] in coupons:
             percentage = coupons[request.POST['coupon'].lower()]
+
             try:
                 coupon = stripe.Coupon.create(
                     duration='once',
                     id=request.POST['coupon'].lower(),
                     percent_off=percentage
                 )
+
             except:
                 pass
+
             subscription = stripe.Subscription.create(
                 customer=stripe_customer.id,
                 items=[dict(plan=plan)],
                 coupon=request.POST['coupon'].lower()
             )
-            return redirect('home')
         else:
             subscription = stripe.Subscription.create(
                 customer=stripe_customer.id,
                 items=[dict(plan=plan)]
             )
+
+        customer = Customer()
+        customer.user = request.user
+        customer.stripe_id = stripe_customer.id
+        customer.membership = True
+        customer.cancel_at_period_end = False
+        customer.stripe_sub_id = subscription.id
+        customer.save()
+
         return redirect('home')
     else:
         coupon = 'none'
@@ -101,7 +125,22 @@ def checkout(request):
 
 
 def settings(request):
-    return render(request, 'registration/settings.html')
+    membership = False
+    cancel_at_period_end = False
+    if request.method == 'POST':
+        pass
+    elif request.method == 'GET':
+        try:
+            if request.user.customer.membership:
+                membership = True
+            if request.user.customer.cancel_at_period_end:
+                cancel_at_period_end = True
+        except Customer.DoesNotExist:
+            pass
+    return render(request, 'registration/settings.html', {
+        'membership': membership,
+        'cancel_at_period_end': cancel_at_period_end
+    })
 
 
 class SignUp(generic.CreateView):
