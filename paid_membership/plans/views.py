@@ -4,16 +4,38 @@ from django.urls import reverse_lazy
 from django.views import generic
 from .models import FitnessPlan, Customer
 from django.contrib.auth import authenticate, login
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from paid_membership.settings.security import stripe_secret_key
+from django.http import HttpResponse
 import stripe
 
 stripe.api_key = stripe_secret_key.secret_key
 
 
+@user_passes_test(lambda u: u.is_superuser)
+def update_accounts(request):
+    """
+    Special method for superusers that synchronize
+    the stripe's and database's subscription in case
+    something has changed on Stripe
+    """
+    customers = Customer.objects.all()
+    for customer in customers:
+        subscription = stripe.Subscription.retrieve(
+            customer.stripe_sub_id
+        )
+        if subscription.status != 'active':
+            customer.membership = False
+        else:
+            customer.membership = True
+        customer.cancel_at_period_end = subscription.cancel_at_period_end
+        customer.save()
+    return HttpResponse('Completed')
+
+
 def home(request):
     plans = FitnessPlan.objects
-    return render(request, 'plans/home.html', {'plans':plans})
+    return render(request, 'plans/home.html', {'plans': plans})
 
 
 def plan(request, pk):

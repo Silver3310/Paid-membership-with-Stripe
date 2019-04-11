@@ -19,6 +19,12 @@ from django.urls import path, include
 from .settings.security import safe_urls
 
 urlpatterns = [
-    path(safe_urls.admin_url, admin.site.urls),
-    path('', include('plans.urls'))
+    path(
+        safe_urls.admin_url,
+        admin.site.urls
+    ),
+    path(
+        '',
+        include('plans.urls')
+    )
 ]
