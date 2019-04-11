@@ -2,14 +2,14 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
-class FitnessPlan(models.Model):
+class HelpfulArticle(models.Model):
     """
-    A custom model for fitness plans
+    A custom model for helpful articles, advices and plans
 
     Attributes:
-        title (str): a title of a plan
-        text (str): text of a plan
-        premium (bool): if a plan is premium or not
+        title (str): a title of an article
+        text (str): text of an article
+        premium (bool): if an article is premium or not
     """
     title = models.CharField(max_length=255)
     text = models.TextField()

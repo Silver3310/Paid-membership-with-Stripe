@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .forms import CustomSignupForm
 from django.urls import reverse_lazy
 from django.views import generic, View
-from .models import FitnessPlan, Customer
+from .models import HelpfulArticle, Customer
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -39,7 +39,7 @@ def home(request):
     """
     Homepage with a list of templates available
     """
-    plans = FitnessPlan.objects
+    plans = HelpfulArticle.objects
     return render(
         request,
         'plans/home.html',
@@ -49,19 +49,19 @@ def home(request):
 
 def plan(request, pk):
     """
-    Get a particular fitness plan
+    Get a particular helpful article
     """
-    fitness_plan = get_object_or_404(FitnessPlan, pk=pk)
+    helpful_article = get_object_or_404(HelpfulArticle, pk=pk)
     # if this content is premium then we need to check if a user is authenticated and if
     # he/she has a right to see it
-    if fitness_plan.premium:
+    if helpful_article.premium:
         if request.user.is_authenticated:
             try:
                 if request.user.customer.membership:
                     return render(
                         request,
                         'plans/plan.html',
-                        {'plan': fitness_plan}
+                        {'plan': helpful_article}
                     )
             except Customer.DoesNotExist:
                 pass
@@ -70,7 +70,7 @@ def plan(request, pk):
         return render(
             request,
             'plans/plan.html',
-            {'plan': fitness_plan}
+            {'plan': helpful_article}
         )
 
     # if it's premium and a user is not authenticated or doesn't have a membership
