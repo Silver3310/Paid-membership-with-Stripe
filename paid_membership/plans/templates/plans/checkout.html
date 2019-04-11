@@ -10,7 +10,7 @@
         <ul class="list-group mb-3">
           <li class="list-group-item d-flex justify-content-between lh-condensed">
             <div>
-              <h6 class="my-0">Fitness Advice Premium</h6>
+              <h6 class="my-0">Helpful Article Premium</h6>
               <small class="text-muted">{{ plan | title }}</small>
             </div>
             <span class="text-muted">{{ og_dollar }}</span>
@@ -47,7 +47,7 @@
             src="https://checkout.stripe.com/checkout.js" class="stripe-button"
             data-key="pk_test_3PZNKQmD7g9MfrBZB8BTB6cS00r7noEiFY"
             data-amount="{{ price }}"
-            data-name="Fitness Advice, LLC"
+            data-name="Helpful Article, LLC"
             data-description="Premium Membership"
             data-email="{{ user.email }}"
             data-image="https://stripe.com/img/documentation/checkout/marketplace.png"
